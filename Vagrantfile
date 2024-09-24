@@ -10,6 +10,7 @@ $scriptClient = <<-SCRIPTCLIENT
   ssh-keyscan -t ed25519 192.168.56.11 | cat >> /root/.ssh/known_hosts
   chown -R vagrant:vagrant /home/vagrant/
   chown 644 /root/.ssh/id_ed25519
+  chown 644 /home/vagrant/.ssh/id_ed25519
   sudo -i
   BORG_PASSPHRASE='testpassphrase' borg init --encryption=repokey borg@192.168.56.11:/var/backup
   echo -e '[Unit]\nDescription=Borg Backup\n\n[Service]\nType=oneshot\n\nEnvironment="BORG_PASSPHRASE=testpassphrase"\nEnvironment=REPO=borg@192.168.56.11:/var/backup/\nEnvironment=BACKUP_TARGET=/etc\nExecStart=/bin/borg create \\\n   --stats             \\\n   ${REPO}::etc-{now:%%Y-%%m-%%d_%%H:%%M:%%S} ${BACKUP_TARGET}\nExecStart=/bin/borg check ${REPO}\nExecStart=/bin/borg prune \\\n     --keep-minutely 60        \\\n      --keep-hourly 24     \\\n    --keep-daily  90      \\\n    --keep-monthly 12     \\\n   --keep-yearly 1   \\\n${REPO}\nStandardOutput=syslog\nStandardError=syslog\nSyslogIdentifier=borg' >  /etc/systemd/system/borg-backup.service 
